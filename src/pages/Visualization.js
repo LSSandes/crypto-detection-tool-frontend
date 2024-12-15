@@ -68,7 +68,7 @@ const Visualization_table = () => {
             <Table>
               <TableHead style={{ backgroundColor: "#EEBC1D" }}>
                 <TableRow>
-                  {["Creation Time", "From", "To", "Amount", "Status"].map(
+                  {["Creation Time", "Amount", "Status"].map(
                     (head) => (
                       <TableCell
                         style={{
@@ -92,8 +92,6 @@ const Visualization_table = () => {
                       <TableRow key={item.name} style={rowStyle}>
                         {/* <TableCell align="center">{item.hash}</TableCell> */}
                         <TableCell align="center">{item.timestamp}</TableCell>
-                        <TableCell align="center">{item.from}</TableCell>
-                        <TableCell align="center">{item.to}</TableCell>
                         <TableCell align="center">{item.amount}</TableCell>
                         <TableCell align="center">{item.status}</TableCell>
                       </TableRow>

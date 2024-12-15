@@ -25,14 +25,10 @@ const TokenGraph = ({ tokenAddress }) => {
           `https://api.g.alchemy.com/prices/v1/${ALCH_API_KEY}/tokens/by-address`,
           options
         ).then((response) => {
-          const prices = response.data.prices; // Adjust according to actual response structure
-          const labels =
-            prices &&
-            prices.map((price) =>
-              new Date(price.lastUpdatedAt).toLocaleDateString()
-            );
-          const dataValues = prices && prices.map((price) => price.value);
-          console.log("----->", response.data.data);
+          const prices = response.data.data[0].prices[0]; // Adjust according to actual response structure
+          const labels = new Date(prices.lastUpdatedAt).toLocaleDateString()
+          const dataValues = prices.value;
+          console.log("---price -->", response.data.data[0].prices[0]);
           setChartData({
             labels: labels,
             datasets: [
