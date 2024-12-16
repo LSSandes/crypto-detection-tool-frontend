@@ -42,7 +42,7 @@ const Visualization_table = () => {
   useEffect(() => {
     axios
       .get(
-        `http://localhost:5000/api/transactions/all/${tokenAddress}/${walletAddress}/${symbol}`
+        `https://crypto-detection-tool-backend.onrender.com/api/transactions/all/${tokenAddress}/${walletAddress}/${symbol}`
       )
       .then((res) => {
         setLoading(false);
