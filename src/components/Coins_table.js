@@ -54,14 +54,14 @@ const Coins_table = () => {
     setLoading(true);
     localStorage.removeItem('tokens');
     axios
-      .post("https://crypto-detection-tool-backend.onrender.com/api/tokens/all", {
+      .post("http://172.86.107.127:5000/api/tokens/all", {
         startDate: selectedStartDate,
         endDate: selectedEndDate,
       })
       .then((res) => {
         console.log(res.data);
         axios
-          .post("https://crypto-detection-tool-backend.onrender.com/api/tokens/find", {
+          .post("http://172.86.107.127:5000/api/tokens/find", {
             results: res.data,
             startValue: selectedStartValue,
             endValue: selectedEndValue,
