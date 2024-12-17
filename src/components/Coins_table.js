@@ -24,6 +24,7 @@ import { numberWithCommas } from "./banner/Carousel";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import moment from "moment";
 
 const Coins_table = () => {
   const navigate = useNavigate();
@@ -52,16 +53,16 @@ const Coins_table = () => {
   const [loading, setLoading] = useState(false);
   const handleSearch = () => {
     setLoading(true);
-    localStorage.removeItem('tokens');
+    localStorage.removeItem("tokens");
     axios
-      .post("http://172.86.107.127:5000/api/tokens/all", {
+      .post("http://localhost:5000/api/tokens/all", {
         startDate: selectedStartDate,
         endDate: selectedEndDate,
       })
       .then((res) => {
         console.log(res.data);
         axios
-          .post("http://172.86.107.127:5000/api/tokens/find", {
+          .post("http://localhost:5000/api/tokens/find", {
             results: res.data,
             startValue: selectedStartValue,
             endValue: selectedEndValue,
@@ -69,24 +70,24 @@ const Coins_table = () => {
           .then((res) => {
             console.log("--------found!----->", res.data);
             setTokensData(res.data);
-            localStorage.setItem('tokens',JSON.stringify(res.data));
+            localStorage.setItem("tokens", JSON.stringify(res.data));
             setLoading(false);
             // setTokensData(res.data);
             setAlertText("Search results successfully!");
             setAlertOpen(true);
-            setAlertOpen("success");
+            setAlertStatus("success");
           });
       })
       .catch((error) => {
         console.log(error);
         setAlertText("Network error! Too many requests");
         setAlertOpen(true);
-        setAlertOpen("warning");
+        setAlertStatus("warning");
       });
   };
   useEffect(() => {
-    setTokensData(JSON.parse(localStorage.getItem('tokens')));
-  }, [tokensData])
+    setTokensData(JSON.parse(localStorage.getItem("tokens")));
+  }, [tokensData]);
   const [selectedStartDate, setSelectedStartDate] = useState(null);
   const [selectedEndDate, setSelectedEndDate] = useState(null);
   const [selectedStartValue, setSelectedStartValue] = useState(0);
@@ -112,10 +113,32 @@ const Coins_table = () => {
     navigate("/visualization", { state: dataTransfer });
   };
   console.log("----------------------->", tokensData);
+
+  const formatTokenPrice = (value) => {
+    if (value != 0) {
+      const number = Number(value);
+      const formattedValue = number.toFixed(18);
+      const [integerPart, fractionalPart] = formattedValue.split(".");
+      const leadingZerosCount = fractionalPart.match(/^0*/)[0].length - 1;
+      const nonZeroDigits = fractionalPart.replace(/0/g, "").split("").join("");
+      const formattedPrice = `$0.${fractionalPart}`;
+      return {
+        formattedPrice: "$0.0",
+        leadingZerosCount,
+        nonZeroDigits,
+      };
+    } else {
+      return {
+        formattedPrice: "$0",
+        leadingZerosCount: "",
+        nonZeroDigits: "",
+      };
+    }
+  };
   return (
     <>
       <ThemeProvider theme={darkTheme}>
-        <Container style={{ textAlign: "center"}}>
+        <div style={{ textAlign: "center", margin: "100px" }}>
           <Typography
             variant="h4"
             style={{ margin: 18, fontFamily: "ui-serif" }}
@@ -129,6 +152,8 @@ const Coins_table = () => {
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "30px",
+              width: "100%",
+              flexWrap: "wrap",
             }}
           >
             <div
@@ -138,6 +163,8 @@ const Coins_table = () => {
                 alignItems: "center",
                 width: "80%",
                 margin: "10px",
+                flexDirection: window.innerWidth <= 1200 ? "column" : "row",
+                gap: "30px",
               }}
             >
               <h1
@@ -150,18 +177,54 @@ const Coins_table = () => {
               >
                 Ages du projet en jours: entre
               </h1>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={selectedStartDate}
-                  onChange={handleStartDateChange}
-                />
-              </LocalizationProvider>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={selectedEndDate}
-                  onChange={handleEndDateChange}
-                />
-              </LocalizationProvider>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "20px",
+                }}
+              >
+                <h1
+                  style={{
+                    fontFamily: "inherit",
+                    fontSize: "20px",
+                    color: "white",
+                  }}
+                >
+                  Start Date
+                </h1>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={selectedStartDate}
+                    onChange={handleStartDateChange}
+                  />
+                </LocalizationProvider>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "20px",
+                }}
+              >
+                <h1
+                  style={{
+                    fontFamily: "inherit",
+                    fontSize: "20px",
+                    color: "white",
+                  }}
+                >
+                  End Date
+                </h1>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={selectedEndDate}
+                    onChange={handleEndDateChange}
+                  />
+                </LocalizationProvider>
+              </div>
             </div>
             <div
               style={{
@@ -170,6 +233,8 @@ const Coins_table = () => {
                 alignItems: "center",
                 width: "80%",
                 margin: "20px",
+                flexDirection: window.innerWidth <= 1200 ? "column" : "row",
+                gap: "30px",
               }}
             >
               <h1
@@ -182,22 +247,56 @@ const Coins_table = () => {
               >
                 Liqquidite entre
               </h1>
-              <TextField
-                label="min"
-                variant="standard"
-                type="number"
-                style={{ width: "20%" }}
-                value={selectedStartValue}
-                onChange={(e) => setSelectedStartValue(e.target.value)}
-              />
-              <TextField
-                label="max"
-                variant="standard"
-                type="number"
-                stype={{ width: "20%" }}
-                value={selectedEndValue}
-                onChange={(e) => setSelectedEndValue(e.target.value)}
-              />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  gap: "20px",
+                }}
+              >
+                <h1
+                  style={{
+                    fontFamily: "inherit",
+                    fontSize: "20px",
+                    color: "white",
+                  }}
+                >
+                  Min Value
+                </h1>
+                <TextField
+                  label="min ($)"
+                  variant="standard"
+                  type="number"
+                  value={selectedStartValue}
+                  onChange={(e) => setSelectedStartValue(e.target.value)}
+                />
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-around",
+                  alignItems: "center",
+                  gap: "20px",
+                }}
+              >
+                <h1
+                  style={{
+                    fontFamily: "inherit",
+                    fontSize: "20px",
+                    color: "white",
+                  }}
+                >
+                  Max Value
+                </h1>
+                <TextField
+                  label="max ($)"
+                  variant="standard"
+                  type="number"
+                  value={selectedEndValue}
+                  onChange={(e) => setSelectedEndValue(e.target.value)}
+                />
+              </div>
             </div>
             <Button
               variant="outlined"
@@ -212,13 +311,12 @@ const Coins_table = () => {
               <LinearProgress style={{ backgroundColor: "gold" }} />
             ) : (
               <Table>
-                <TableHead style={{ backgroundColor: "#EEBC1D" }}>
+                <TableHead style={{ backgroundColor: "rgb(51, 51, 51)" }}>
                   <TableRow>
                     {[
                       "Coin",
                       "Holders",
                       "Liquidity",
-                      "Exchange",
                       "Pair",
                       "Creation Date",
                       "Token Address",
@@ -226,7 +324,7 @@ const Coins_table = () => {
                     ].map((head) => (
                       <TableCell
                         style={{
-                          color: "black",
+                          color: "white",
                           fontWeight: "700",
                           fontFamily: "ui-serif",
                         }}
@@ -253,18 +351,44 @@ const Coins_table = () => {
                             )
                           }
                         >
-                          <TableCell align="center">{item.name}</TableCell>
-                          <TableCell align="center">{item.holders}</TableCell>
-                          <TableCell align="center">{item.liquidity}</TableCell>
-                          <TableCell align="center">N/A</TableCell>
-                          <TableCell align="center">{item.symbol}</TableCell>
+                          <TableCell align="center" style={{color: "rgb(206, 248, 255)"}}>{item.name}</TableCell>
+                          <TableCell align="center" style={{color: "rgb(206, 248, 255)"}}>{item.holders}</TableCell>
                           <TableCell align="center">
-                            {item.creationTime}
+                            {item.liquidity < 0.00001 ? (
+                              <>
+                                <span style={{ fontSize: "14px", color: "rgb(255, 172, 146)"}}>
+                                  {
+                                    formatTokenPrice(item.liquidity)
+                                      .formattedPrice
+                                  }
+                                </span>
+                                <span style={{ fontSize: "8px", color: "rgb(255, 172, 146)" }}>
+                                  {
+                                    formatTokenPrice(item.liquidity)
+                                      .leadingZerosCount
+                                  }
+                                </span>
+                                <span style={{ fontSize: "14px", color: "rgb(255, 172, 146)" }}>
+                                  {
+                                    formatTokenPrice(item.liquidity)
+                                      .nonZeroDigits
+                                  }
+                                </span>
+                              </>
+                            ) : (
+                              <span style={{fontSize: "14px", color: "rgb(206, 248, 255)"}}>{item.liquidity}</span>
+                            )}
                           </TableCell>
-                          <TableCell align="center">
+                          <TableCell align="center" style={{color: "rgb(206, 248, 255)"}}>{item.symbol}</TableCell>
+                          <TableCell align="center" style={{color: "rgb(206, 248, 255)"}}>
+                            {moment(item.creationTime).format(
+                              "MMM DD HH:mm:ss"
+                            )}
+                          </TableCell>
+                          <TableCell align="center" style={{color: "rgb(206, 248, 255)"}}>
                             {item.token_address}
                           </TableCell>
-                          <TableCell align="center">
+                          <TableCell align="center" style={{color: "rgb(206, 248, 255)"}}>
                             {item.pool_address}
                           </TableCell>
                         </TableRow>
@@ -281,7 +405,7 @@ const Coins_table = () => {
               Aucun jeton, veuillez rechercher les jetons que vous souhaitez.
             </h1>
           )}
-        </Container>
+        </div>
       </ThemeProvider>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}

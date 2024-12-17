@@ -25,22 +25,24 @@ const TokenGraph = ({ tokenAddress }) => {
           `https://api.g.alchemy.com/prices/v1/${ALCH_API_KEY}/tokens/by-address`,
           options
         ).then((response) => {
-          const prices = response.data.data[0].prices[0]; // Adjust according to actual response structure
-          const labels = new Date(prices.lastUpdatedAt).toLocaleDateString()
-          const dataValues = prices.value;
-          console.log("---price -->", response.data.data[0].prices[0]);
-          setChartData({
-            labels: labels,
-            datasets: [
-              {
-                label: "Token Price",
-                data: dataValues,
-                fill: false,
-                backgroundColor: "rgba(75,192,192,0.4)",
-                borderColor: "rgba(75,192,192,1)",
-              },
-            ],
-          });
+          if (response.data.data[0].prices[0]) {
+            const prices = response.data.data[0].prices[0]; // Adjust according to actual response structure
+            const labels = new Date(prices.lastUpdatedAt).toLocaleDateString();
+            const dataValues = prices.value;
+            console.log("---price -->", response.data.data[0].prices[0]);
+            setChartData({
+              labels: labels,
+              datasets: [
+                {
+                  label: "Token Price",
+                  data: dataValues,
+                  fill: false,
+                  backgroundColor: "rgba(75,192,192,0.4)",
+                  borderColor: "rgba(75,192,192,1)",
+                },
+              ],
+            });
+          }
         });
       } catch (error) {
         console.error("Error fetching token data:", error);
@@ -55,25 +57,43 @@ const TokenGraph = ({ tokenAddress }) => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div style={{ width: "80%"}}>
+    <div style={{ width: "80%" }}>
       <h2>Token Price Graph</h2>
-      <Line
-        data={chartData}
-        options={{
-          scales: {
-            x: {
-              grid: {
-                color: "rgba(226, 215, 217, 0.81)", // Customize x-axis grid color
+      {chartData.length > 0 ? (
+        <Line
+          data={chartData}
+          options={{
+            scales: {
+              x: {
+                grid: {
+                  color: "rgba(226, 215, 217, 0.81)", // Customize x-axis grid color
+                },
+              },
+              y: {
+                grid: {
+                  color: "rgba(212, 223, 231, 0.87)", // Customize y-axis grid color
+                },
               },
             },
-            y: {
-              grid: {
-                color: "rgba(212, 223, 231, 0.87)", // Customize y-axis grid color
-              },
-            },
-          },
-        }}
-      />
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: "100%",
+            height: "300px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            border: "solid 1px white",
+            margin: "50px",
+          }}
+        >
+          <h1 style={{ fontFamily: "inherit", color: "white" }}>
+            No Token Graph
+          </h1>
+        </div>
+      )}
     </div>
   );
 };

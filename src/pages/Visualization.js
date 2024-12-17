@@ -4,7 +4,6 @@ import axios from "axios";
 import {
   createTheme,
   TableContainer,
-  TextField,
   ThemeProvider,
   Typography,
   LinearProgress,
@@ -14,7 +13,6 @@ import {
   TableCell,
   Paper,
   TableBody,
-  Button,
 } from "@mui/material";
 import { Container } from "@mui/system";
 import TokenGraph from "../components/Token_graph";
@@ -40,16 +38,26 @@ const Visualization_table = () => {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState();
   useEffect(() => {
-    axios
-      .get(
-        `http://172.86.107.127:5000/api/transactions/all/${tokenAddress}/${walletAddress}/${symbol}`
-      )
-      .then((res) => {
-        setLoading(false);
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/transactions/all/${tokenAddress}/${walletAddress}/${symbol}`
+        );
         console.log("transactions---->", res.data);
-        setTransactions(res.data);
-      });
-  }, []);
+
+        if (res.data) {
+          setTransactions(res.data); // Set to empty array if undefined
+        }
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+        setTransactions([]); // Fallback to empty array on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [tokenAddress, walletAddress, symbol]);
   return (
     <ThemeProvider theme={darkTheme}>
       <Container style={{ textAlign: "center" }}>
@@ -57,7 +65,7 @@ const Visualization_table = () => {
           Visualization by Alchemy API
         </Typography>
       </Container>
-      <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "center", width: "90%" }}>
         <TokenGraph tokenAddress={tokenAddress} />
       </div>
       <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
@@ -68,25 +76,23 @@ const Visualization_table = () => {
             <Table>
               <TableHead style={{ backgroundColor: "#EEBC1D" }}>
                 <TableRow>
-                  {["Creation Time", "Amount", "Status"].map(
-                    (head) => (
-                      <TableCell
-                        style={{
-                          color: "black",
-                          fontWeight: "700",
-                          fontFamily: "ui-serif",
-                        }}
-                        key={head}
-                        align={"center"}
-                      >
-                        {head}
-                      </TableCell>
-                    )
-                  )}
+                  {["Creation Time", "Amount", "Status"].map((head) => (
+                    <TableCell
+                      style={{
+                        color: "black",
+                        fontWeight: "700",
+                        fontFamily: "ui-serif",
+                      }}
+                      key={head}
+                      align={"center"}
+                    >
+                      {head}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {transactions &&
+                {transactions.length > 0 ? (
                   transactions.map((item) => {
                     return (
                       <TableRow key={item.name} style={rowStyle}>
@@ -96,28 +102,24 @@ const Visualization_table = () => {
                         <TableCell align="center">{item.status}</TableCell>
                       </TableRow>
                     );
-                  })}
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} align="center">
+                      <h1
+                        style={{
+                          color: "white",
+                          fontFamily: "inherit",
+                          fontSize: "20px",
+                        }}
+                      >
+                        Aucune transaction
+                      </h1>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
-          )}
-          {transactions == "" && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <h1
-                style={{
-                  color: "white",
-                  fontFamily: "inherit",
-                  fontsize: "20px",
-                }}
-              >
-                Aucune transaction
-              </h1>
-            </div>
           )}
         </TableContainer>
       </div>

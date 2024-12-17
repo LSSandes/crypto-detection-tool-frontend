@@ -48,7 +48,6 @@ const Banner = () => {
             Obtenez toutes les informations concernant les nouveaux projets Ethereum qui n'ont pas plus de 2 jours et dont la liquidité est inférieure à 50 $
           </Typography>
         </div>
-        <Carousel/>
       </Container>
     </div>
   );
